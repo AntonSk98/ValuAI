@@ -27,9 +27,6 @@ go.work.sum
 # env file
 .env
 
-#binary
-valuai
-
 # Editor/IDE
 # .idea/
 # .vscode/
