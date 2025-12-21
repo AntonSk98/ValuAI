@@ -1,0 +1,25 @@
+analysis_flow:
+  - state: TEST_START
+    prompt:
+      en: "Test welcome message"
+    transition: TEST_STEP1
+
+  - state: TEST_STEP1
+    prompt:
+      en: "Test step 1"
+    transition: TEST_END
+
+  - state: TEST_END
+    prompt:
+      en: "Test complete"
+
+  - state: TEST_OPTIONAL
+    optional: true
+    prompt:
+      en: "Test optional step"
+    transition: TEST_END
+
+exceptions:
+  - type: TEST_EXCEPTION
+    message:
+      en: "Test exception occurred"

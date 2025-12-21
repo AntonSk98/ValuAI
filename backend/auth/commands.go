@@ -25,8 +25,9 @@ func (cmd IssueOtpCommand) Validate() error {
 
 // VerifyOtpCommand contains the email and OTP code for verification.
 type VerifyOtpCommand struct {
-	Email string `json:"email"`
-	Otp   string `json:"otp"`
+	Email    string          `json:"email"`
+	Otp      string          `json:"otp"`
+	Language common.Language `json:"language"`
 }
 
 func (cmd VerifyOtpCommand) Validate() error {

@@ -2,7 +2,10 @@ module valuai
 
 go 1.25
 
-require github.com/gofiber/fiber/v2 v2.52.9
+require (
+	github.com/gofiber/fiber/v2 v2.52.9
+	gopkg.in/yaml.v3 v3.0.1
+)
 
 require (
 	github.com/philhofer/fwd v1.1.3-0.20240916144458-20a13a1f6b7c // indirect

@@ -98,7 +98,12 @@ func (auth *AuthenticationService) VerifyOtp(verifyOtpCommand VerifyOtpCommand) 
 
 	auth.issuedOtps.Delete(verifyOtpCommand.Otp)
 
-	token, err := auth.generateToken(verifyOtpCommand.Email)
+	var claims = Claims{
+		Email:    verifyOtpCommand.Email,
+		Language: verifyOtpCommand.Language,
+	}
+
+	token, err := auth.generateToken(claims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
@@ -107,14 +112,15 @@ func (auth *AuthenticationService) VerifyOtp(verifyOtpCommand VerifyOtpCommand) 
 }
 
 // generateToken creates a signed JWT access token for the given email with configured expiration.
-func (auth *AuthenticationService) generateToken(email string) (*Token, error) {
+func (auth *AuthenticationService) generateToken(claims Claims) (*Token, error) {
 	now := time.Now()
 
 	accessClaims := jwt.MapClaims{
-		"iss":   issuer,
-		"email": email,
-		"exp":   now.Add(auth.authConfig.tokenExpirationDuration).Unix(),
-		"iat":   now.Unix(),
+		"iss":      issuer,
+		"email":    claims.Email,
+		"language": claims.Language,
+		"exp":      now.Add(auth.authConfig.tokenExpirationDuration).Unix(),
+		"iat":      now.Unix(),
 	}
 	accessToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims).
 		SignedString([]byte(auth.authConfig.jwtSecret))

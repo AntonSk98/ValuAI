@@ -2,46 +2,61 @@ package auth
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// AuthMiddleware acts as an interceptor to validate JWT access tokens in incoming requests.
+// AuthenticationConfig holds configuration for JWT authentication
 type AuthMiddleware struct {
 	authConfig *AuthenticationConfig
 }
 
-// InitAuthMiddleware initializes an AuthMiddleware with the given AuthenticationConfig.
+// InitAuthMiddleware initializes the AuthMiddleware with the given configuration.
 func InitAuthMiddleware(cfg *AuthenticationConfig) *AuthMiddleware {
 	return &AuthMiddleware{
 		authConfig: cfg,
 	}
 }
 
-// ValidateAccessToken checks the signature, expiration, and issuer of a JWT access token.
-// Returns an error if the token is invalid, expired, or issued by an unexpected source.
-func (am *AuthMiddleware) ValidateAccessToken(accessToken string) error {
-	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+// Protect is a Fiber middleware that validates the JWT and stores claims in the request context.
+func (am *AuthMiddleware) Protect() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
+			return fiber.ErrUnauthorized
 		}
-		return []byte(am.authConfig.jwtSecret), nil
-	})
-	if err != nil {
-		return fmt.Errorf("invalid access token: %w", err)
-	}
 
-	if !token.Valid {
-		return fmt.Errorf("invalid or expired access token")
-	}
+		// Expecting "Bearer <token>"
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		if tokenStr == authHeader {
+			return fiber.ErrUnauthorized
+		}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return fmt.Errorf("invalid token claims")
-	}
-	if iss, ok := claims["iss"].(string); !ok || iss != issuer {
-		return fmt.Errorf("invalid issuer")
-	}
+		// Parse and validate JWT
+		token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(am.authConfig.jwtSecret), nil
+		})
+		if err != nil || !token.Valid {
+			return fiber.ErrUnauthorized
+		}
 
-	return nil
+		// Extract claims
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			return fiber.ErrUnauthorized
+		}
+		if iss, ok := claims["iss"].(string); !ok || iss != issuer {
+			return fiber.ErrUnauthorized
+		}
+
+		// Store claims in request context for handlers
+		c.Locals("claims", claims)
+
+		return c.Next()
+	}
 }
