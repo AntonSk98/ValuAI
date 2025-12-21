@@ -6,8 +6,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// LoadConfig loads a YAML configuration file into the provided struct.
-func LoadConfig(path string, cfg interface{}) error {
+// LoadProperties loads YAML configuration from the specified file path into the provided struct.
+func LoadProperties(path string, cfg interface{}) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err

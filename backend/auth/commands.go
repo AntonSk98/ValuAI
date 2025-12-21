@@ -16,8 +16,8 @@ func (cmd IssueOtpCommand) Validate() error {
 		return errors.New("email is a required parameter")
 	}
 
-	if cmd.Language == "" {
-		return errors.New("language is a required parameter")
+	if !common.IsLanguageSupported(cmd.Language) {
+		return errors.New("unsupported language")
 	}
 
 	return nil
@@ -37,6 +37,10 @@ func (cmd VerifyOtpCommand) Validate() error {
 
 	if cmd.Otp == "" {
 		return errors.New("otp is a required parameter")
+	}
+
+	if !common.IsLanguageSupported(cmd.Language) {
+		return errors.New("unsupported language")
 	}
 
 	return nil

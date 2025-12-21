@@ -60,7 +60,7 @@ func (auth *AuthenticationService) GenerateOtp(cmd IssueOtpCommand) error {
 		return err
 	}
 
-	emailTitle := otpTemplate.Title()
+	emailTitle := otpTemplate.Title
 	emailBody, err := otpTemplate.ResolveTemplateContent(otpCode)
 	if err != nil {
 		return err

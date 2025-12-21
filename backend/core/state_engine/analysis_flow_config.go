@@ -21,7 +21,7 @@ type State struct {
 // InitAnalysisFlowStateEngine loads the analysis flow configuration from the specified YAML file.
 func InitAnalysisFlowStateEngine(path string) *AnalysisFlowStateEngine {
 	var analysisFlowConfig AnalysisFlowStateEngine
-	common.LoadConfig(path, &analysisFlowConfig)
+	common.LoadProperties(path, &analysisFlowConfig)
 	return &analysisFlowConfig
 }
 

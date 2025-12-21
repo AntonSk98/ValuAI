@@ -25,6 +25,9 @@ func main() {
 
 	mailSender := mail.InitMailSender()
 
+	// Load mail templates
+	mail.ResolveTemplates("resources/mail_templates.yml")
+
 	authConfig := auth.InitAuthConfig(os.Getenv("JWT_SECRET"), time.Hour*24)
 	authService := auth.NewAuthenticationService(mailSender, authConfig)
 	auth.InitAuthenticationController(app, authService)
